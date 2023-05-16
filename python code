@@ -1,0 +1,28 @@
+from pytube import YouTube
+from tqdm import tqdm
+
+# List of YouTube video URLs
+video_urls = [
+    "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "https://www.youtube.com/watch?v=6ZfuNTqbHE8",
+    "https://www.youtube.com/watch?v=czTksCF6X8Y"
+]
+
+# Loop through each video URL and download the video
+for url in video_urls:
+    try:
+        # Create a YouTube object
+        yt = YouTube(url)
+
+        # Get the first stream with the highest resolution
+        stream = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first()
+
+        # Download the video with a progress bar
+        print(f"Downloading {yt.title}...")
+        stream.download(output_path="./downloads", filename=yt.title, 
+                        filename_prefix="Downloading ", 
+                        on_progress_callback=lambda stream, chunk, file_handle, bytes_remaining: 
+                            tqdm(total=stream.filesize, initial=stream.filesize - bytes_remaining, unit='B', unit_scale=True, desc=yt.title, ncols=80))
+
+    except Exception as e:
+        print(f"Error downloading {url}: {e}")
